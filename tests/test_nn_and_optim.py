@@ -7,8 +7,6 @@ import needle.nn as nn
 sys.path.append("./apps")
 from mlp_resnet import *
 
-import mugrade
-
 """Deterministically generate a matrix"""
 def get_tensor(*shape, entropy=1):
     np.random.seed(np.prod(shape) * len(shape) * entropy)
