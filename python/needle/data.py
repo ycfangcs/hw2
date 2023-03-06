@@ -117,7 +117,6 @@ class DataLoader:
     # 训练时用这个迭代器遍历数据集里的数据
     def __iter__(self):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
         self.start = 0
         return self
 
@@ -178,7 +177,7 @@ class NDArrayDataset(Dataset):
         return tuple([a[i] for a in self.arrays])
 
 
-def parse_mnist(image_filesname, label_filename):
+def parse_mnist(image_filename, label_filename):
     """ Read an images and labels file in MNIST format.  See this page:
     http://yann.lecun.com/exdb/mnist/ for a description of the file format.
 
@@ -201,7 +200,7 @@ def parse_mnist(image_filesname, label_filename):
                 for MNIST will contain the values 0-9.
     """
     ### BEGIN YOUR SOLUTION
-    with gzip.open(image_filesname, 'rb') as f:
+    with gzip.open(image_filename, 'rb') as f:
         file_content = f.read()
         # use big-endian!
         num = struct.unpack('>I', file_content[4:8])[0]
