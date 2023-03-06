@@ -26,7 +26,9 @@ class RandomFlipHorizontal(Transform):
         """
         flip_img = np.random.rand() < self.p
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        if flip_img:
+            return np.flip(img, axis=1)
+        return img
         ### END YOUR SOLUTION
 
 
@@ -44,7 +46,17 @@ class RandomCrop(Transform):
         """
         shift_x, shift_y = np.random.randint(low=-self.padding, high=self.padding+1, size=2)
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        result = np.zeros_like(img)
+        H, W = img.shape[0], img.shape[1]
+        # NOTE: when shift out of bounds, just return zeros 
+        if abs(shift_x) >= H or abs(shift_y) >= W:
+            return result
+        st_1, ed_1 = max(0, -shift_x), min(H - shift_x, H)
+        st_2, ed_2 = max(0, -shift_y), min(W - shift_y, W)
+        img_st_1, img_ed_1 = max(0, shift_x), min(H + shift_x, H)
+        img_st_2, img_ed_2 = max(0, shift_y), min(W + shift_y, W)
+        result[st_1:ed_1, st_2:ed_2, :] = img[img_st_1:img_ed_1, img_st_2:img_ed_2, :]
+        return result
         ### END YOUR SOLUTION
 
 
@@ -100,16 +112,23 @@ class DataLoader:
         if not self.shuffle:
             self.ordering = np.array_split(np.arange(len(dataset)), 
                                            range(batch_size, len(dataset), batch_size))
-
+    
+    # Dataloader就是在Dataset数据的基础上构造一个iterator(迭代器)
+    # 训练时用这个迭代器遍历数据集里的数据
     def __iter__(self):
         ### BEGIN YOUR SOLUTION
         raise NotImplementedError()
-        ### END YOUR SOLUTION
+        self.start = 0
         return self
 
     def __next__(self):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        if self.start == len(self.ordering):
+            raise StopIteration
+        a = self.start
+        self.start += 1
+        samples = [Tensor(x) for x in self.dataset[self.ordering[a]]]
+        return tuple(samples)
         ### END YOUR SOLUTION
 
 
@@ -121,17 +140,31 @@ class MNISTDataset(Dataset):
         transforms: Optional[List] = None,
     ):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        super().__init__(transforms)
+        # 构造函数里读数据
+        self.images, self.labels = parse_mnist(
+            image_filename=image_filename,
+            label_filename=label_filename
+        )
         ### END YOUR SOLUTION
 
+    # []重载，用这个重载对dataset[i]应该返回第i个X和第i个y
     def __getitem__(self, index) -> object:
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        X, y = self.images[index], self.labels[index]
+        # NOTE: `self.transforms` need input shape like this.
+        if self.transforms:
+            X_in = X.reshape((28, 28, -1))
+            X_out = self.apply_transforms(X_in)
+            X_ret = X_out.reshape(-1, 28 * 28)
+            return X_ret, y
+        else:
+            return X, y
         ### END YOUR SOLUTION
 
     def __len__(self) -> int:
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return self.labels.shape[0]
         ### END YOUR SOLUTION
 
 class NDArrayDataset(Dataset):
