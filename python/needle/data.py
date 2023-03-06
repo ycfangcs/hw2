@@ -109,16 +109,19 @@ class DataLoader:
         self.dataset = dataset
         self.shuffle = shuffle
         self.batch_size = batch_size
+        indices = np.arange(len(dataset))
         if not self.shuffle:
-            self.ordering = np.array_split(np.arange(len(dataset)), 
+            self.ordering = np.array_split(indices, 
                                            range(batch_size, len(dataset), batch_size))
-    
-    # Dataloader就是在Dataset数据的基础上构造一个iterator(迭代器)
-    # 训练时用这个迭代器遍历数据集里的数据
+        else:
+            np.random.shuffle(indices)
+            self.ordering = np.array_split(indices, 
+                                           range(batch_size, len(dataset), batch_size))
     def __iter__(self):
         ### BEGIN YOUR SOLUTION
         self.start = 0
         return self
+        ### END YOUR SOLUTION
 
     def __next__(self):
         ### BEGIN YOUR SOLUTION
